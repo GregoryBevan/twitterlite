@@ -3,6 +3,7 @@ package twitterlite.config;
 import java.util.HashSet;
 import java.util.Set;
 
+import twitterlite.controllers.MessageController;
 import twitterlite.controllers.UserController;
 
 import com.google.api.server.spi.guice.GuiceSystemServiceServletModule;
@@ -18,6 +19,8 @@ public class TwitterLiteEndPointsModule extends GuiceSystemServiceServletModule 
 		
 		Set<Class<?>> serviceClasses = new HashSet<Class<?>>();
 	    serviceClasses.add(UserController.class);
+	    serviceClasses.add(MessageController.class);
+	    
 	    this.serveGuiceSystemServiceServlet("/_ah/spi/*", serviceClasses);
 	    
 	    // INTERCEPTORS

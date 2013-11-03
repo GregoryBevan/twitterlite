@@ -67,28 +67,6 @@ public class UserController {
 	}
 	
 	@ApiMethod(
-			name = "list",
-			path = "user",
-			httpMethod = HttpMethod.GET
-		)
-	public Map<String, Object> getUsers(@Named("limit") Integer limit,
-										@Nullable @Named("cursor") String encodedCursor) {
-
-		if (limit < 0 || limit > 25)
-			limit = 25;
-		ListChunk<User> users = userManager.getAllUsers(encodedCursor, limit.intValue());
-		List<UserDTO> dtos = new LinkedList<UserDTO>();
-		for (User user : users.chunk)
-			dtos.add(UserDTO.get(user));
-		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", users.cursor.toWebSafeString());
-		
-		return map;
-	}
-	
-	@ApiMethod(
 			name = "read",
 			path = "user/{key}",
 			httpMethod = HttpMethod.GET
@@ -135,13 +113,35 @@ public class UserController {
 	}
 	
 	@ApiMethod(
-			name = "follow",
+			name = "unfollow",
 			path = "follow/{key}",
 			httpMethod = HttpMethod.DELETE
 		)
 	public void unFollowUser(	@Named("unFollowerKey") String unFollowerKey, 
-							@Named("unFollowedKey") String unFollowedKey) throws NotFoundException, BadRequestException {
+								@Named("unFollowedKey") String unFollowedKey) throws NotFoundException, BadRequestException {
 		userManager.followUser(unFollowerKey, unFollowedKey);
+	}
+	
+	@ApiMethod(
+			name = "list",
+			path = "user",
+			httpMethod = HttpMethod.GET
+		)
+	public Map<String, Object> getUsers(@Named("limit") Integer limit,
+										@Nullable @Named("cursor") String encodedCursor) {
+
+		if (limit < 0 || limit > 25)
+			limit = 25;
+		ListChunk<User> users = userManager.getAllUsers(encodedCursor, limit.intValue());
+		List<UserDTO> dtos = new LinkedList<UserDTO>();
+		for (User user : users.chunk)
+			dtos.add(UserDTO.get(user));
+		
+		Map<String, Object> map = new HashMap<>();
+		map.put("list", dtos);
+		map.put("cursor", users.getEncodedCursor());
+		
+		return map;
 	}
 	
 	@ApiMethod(
@@ -162,7 +162,7 @@ public class UserController {
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
-		map.put("cursor", users.cursor.toWebSafeString());
+		map.put("cursor", users.getEncodedCursor());
 		
 		return map;
 	}
@@ -185,7 +185,7 @@ public class UserController {
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
-		map.put("cursor", users.cursor.toWebSafeString());
+		map.put("cursor", users.getEncodedCursor());
 		
 		return map;
 	}
