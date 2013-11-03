@@ -7,13 +7,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.inject.Named;
-
-import org.apache.bval.guice.Validate;
 
 import twitterlite.managers.ListChunk;
 import twitterlite.managers.UserManager;
@@ -38,7 +35,7 @@ public class UserController {
 	
 	private UserManager userManager;
 	
-	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+//	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 	
 	// TODO: log everywhere
 	
@@ -96,7 +93,6 @@ public class UserController {
 			path = "user/{key}",
 			httpMethod = HttpMethod.GET
 		)
-	@Validate
 	public UserDTO getUser(@Named("key") String keyStr) throws NotFoundException {
 		return UserDTO.get(userManager.get(keyStr).read());
 	}
@@ -107,7 +103,6 @@ public class UserController {
 			path = "user/{key}",
 			httpMethod = HttpMethod.PUT
 		)
-	@Validate
 	public void updateUser(@Named("key") String keyStr, UserDTO dto) throws NotFoundException, BadRequestException {
 		ManagedUser mUser = userManager.get(keyStr);
 		try {
@@ -124,7 +119,6 @@ public class UserController {
 			path = "user/{key}",
 			httpMethod = HttpMethod.DELETE
 		)
-	@Validate
 	public void deleteUser(@Named("key") String keyStr) throws NotFoundException {
 		userManager.get(keyStr).delete();
 	}
@@ -135,7 +129,6 @@ public class UserController {
 			path = "follow/{key}",
 			httpMethod = HttpMethod.POST
 		)
-	@Validate
 	public void followUser(	@Named("followerKey") String followerKey, 
 							@Named("followedKey") String followedKey) throws NotFoundException, BadRequestException {
 		userManager.followUser(followerKey, followedKey);
@@ -146,7 +139,6 @@ public class UserController {
 			path = "follow/{key}",
 			httpMethod = HttpMethod.DELETE
 		)
-	@Validate
 	public void unFollowUser(	@Named("unFollowerKey") String unFollowerKey, 
 							@Named("unFollowedKey") String unFollowedKey) throws NotFoundException, BadRequestException {
 		userManager.followUser(unFollowerKey, unFollowedKey);

@@ -1,7 +1,5 @@
 package twitterlite.controllers;
 
-import java.util.logging.Logger;
-
 import twitterlite.managers.MessageManager;
 import twitterlite.models.message.Message.MessageDTO;
 
@@ -21,7 +19,7 @@ public class MessageController {
 	
 	private MessageManager msgManager;
 	
-	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+//	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 	
 	// TODO: log everywhere
 	
