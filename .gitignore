@@ -1,0 +1,9 @@
+.metadata/
+.settings/
+.classpath
+target/
+
+*~
+.DS_Store
+Thumbs.db
+*.class
