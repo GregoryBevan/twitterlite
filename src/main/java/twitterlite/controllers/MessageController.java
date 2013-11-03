@@ -117,7 +117,7 @@ public class MessageController {
 	
 	@ApiMethod(
 			name = "user.messages.list",
-			path = "messages",
+			path = "message/user",
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserMessages(	@Nullable 
@@ -141,7 +141,7 @@ public class MessageController {
 	
 	@ApiMethod(
 			name = "user.timeline.list",
-			path = "/user/timeline",
+			path = "message/user/timeline",
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserTimeline(	@Nullable 

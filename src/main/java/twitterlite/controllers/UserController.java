@@ -105,7 +105,7 @@ public class UserController {
 	@ApiMethod(
 			name = "follow",
 			path = "follow/{key}",
-			httpMethod = HttpMethod.POST
+			httpMethod = HttpMethod.PUT
 		)
 	public void followUser(	@Named("followerKey") String followerKey, 
 							@Named("followedKey") String followedKey) throws NotFoundException, BadRequestException {
@@ -114,8 +114,8 @@ public class UserController {
 	
 	@ApiMethod(
 			name = "unfollow",
-			path = "follow/{key}",
-			httpMethod = HttpMethod.DELETE
+			path = "unfollow/{key}",
+			httpMethod = HttpMethod.PUT
 		)
 	public void unFollowUser(	@Named("unFollowerKey") String unFollowerKey, 
 								@Named("unFollowedKey") String unFollowedKey) throws NotFoundException, BadRequestException {
@@ -146,7 +146,7 @@ public class UserController {
 	
 	@ApiMethod(
 			name = "followers",
-			path = "follow/followers",
+			path = "followers",
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserFollowers(@Named("limit") Integer limit,
@@ -169,7 +169,7 @@ public class UserController {
 	
 	@ApiMethod(
 			name = "followed",
-			path = "follow/followed",
+			path = "followed",
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserFollowed(@Named("limit") Integer limit,
