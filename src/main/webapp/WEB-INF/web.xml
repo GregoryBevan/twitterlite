@@ -14,7 +14,7 @@
 	</filter-mapping>
 
 	<listener>
-		<listener-class>twitterlite.config.TwitterLiteServletContextListener</listener-class>
+		<listener-class>com.twitterlite.config.TwitterLiteServletContextListener</listener-class>
 	</listener>
 
 	<!-- FORCE HTTPS -->

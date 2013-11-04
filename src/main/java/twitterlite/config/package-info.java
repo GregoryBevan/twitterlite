@@ -1,2 +1,0 @@
-@twitterlite.util.annotations.EverythingIsNonnullAndTaintedByDefault
-package twitterlite.config;

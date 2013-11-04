@@ -166,7 +166,7 @@
 			        <enableJarClasses>false</enableJarClasses>
 			        <jvmFlags>
 			            <jvmFlag>-Xdebug</jvmFlag>
-			            <jvmFlag>-Xrunjdwp:transport=dt_socket,address=1044,server=y,suspend=y
+			            <jvmFlag>-Xrunjdwp:transport=dt_socket,address=8888,server=y,suspend=y
 			            </jvmFlag>
 			        </jvmFlags>
 			    </configuration>
