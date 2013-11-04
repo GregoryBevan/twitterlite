@@ -59,11 +59,11 @@ public class UserController {
 			httpMethod = HttpMethod.POST
 	)
 	@LoginNotNeeded
-	public void createUser(CreateUserdDTO udto) throws BadRequestException {
+	public UserGetDTO createUser(CreateUserdDTO udto) throws BadRequestException {
 		try {
 			checkNotNull(udto.login);
 			checkNotNull(udto.email);
-			userManager.create(udto.login, udto.email);
+			return UserGetDTO.get(userManager.create(udto.login, udto.email).read());
 		} catch (IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage());
 		} catch (NullPointerException e) {

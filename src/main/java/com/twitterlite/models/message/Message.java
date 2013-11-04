@@ -105,10 +105,13 @@ public class Message extends BaseModel {
 	}
 	public static class MessageSetDTO implements Serializable { 
 		private static final long serialVersionUID = 1L;
-		@CheckForNull public String text;
+		@CheckForNull private String text;
 		public MessageSetDTO(){}
 		public @CheckForNull String getText() {
 			return text;
+		}
+		public void setText(String text) {
+			this.text = text;
 		}
 	}
 

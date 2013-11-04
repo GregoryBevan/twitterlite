@@ -8,6 +8,7 @@ import com.google.inject.matcher.Matchers;
 import com.googlecode.objectify.ObjectifyFilter;
 import com.twitterlite.controllers.LoginController;
 import com.twitterlite.controllers.MessageController;
+import com.twitterlite.controllers.TestServerController;
 import com.twitterlite.controllers.UserController;
 import com.twitterlite.controllers.interceptors.ControllerInterceptor;
 import com.twitterlite.controllers.interceptors.InterceptWith;
@@ -25,6 +26,7 @@ public class TwitterLiteEndPointsModule extends GuiceSystemServiceServletModule 
 		serviceClasses.add(UserController.class);
 	    serviceClasses.add(MessageController.class);
 	    serviceClasses.add(LoginController.class);
+	    serviceClasses.add(TestServerController.class);
 	    
 	    this.serveGuiceSystemServiceServlet("/_ah/spi/*", serviceClasses);
 	    

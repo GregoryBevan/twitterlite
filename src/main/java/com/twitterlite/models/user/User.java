@@ -120,11 +120,23 @@ public class User extends BaseModel {
 	}
 	public static class UserSetDTO implements Serializable {
 		private static final long serialVersionUID = 1L;
-		@CheckForNull public String email;
-		@CheckForNull public String login;
-		@CheckForNull public String firstName;
-		@CheckForNull public String lastName;
+		@CheckForNull private String email;
+		@CheckForNull private String login;
+		@CheckForNull private String firstName;
+		@CheckForNull private String lastName;
 		public UserSetDTO(){}
+		public void setEmail(String email) {
+			this.email = email;
+		}
+		public void setLogin(String login) {
+			this.login = login;
+		}
+		public void setFirstName(String firstName) {
+			this.firstName = firstName;
+		}
+		public void setLastName(String lastName) {
+			this.lastName = lastName;
+		}
 		public @CheckForNull String getEmail() {
 			return email;
 		}

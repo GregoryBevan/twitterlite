@@ -49,13 +49,13 @@ public class MessageController {
 			path = "message",
 			httpMethod = HttpMethod.POST
 	)
-	public void postMessage(@Named("senderKey") String senderKeyStr,
+	public MessageGetDTO postMessage(@Named("senderKey") String senderKeyStr,
 							  MessageSetDTO dto) throws BadRequestException {
 		try {
 			String text = dto.getText();
 			if (text == null)
 				throw new BadRequestException("Message text must be at least one character and less than 140 characters");
-			msgManager.create(text, senderKeyStr);
+			return MessageGetDTO.get(msgManager.create(text, senderKeyStr).read());
 		} catch (IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage());
 		}
