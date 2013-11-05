@@ -121,6 +121,27 @@ public class User extends BaseModel {
 			dto.userKey = user.getKey().getString();
 			return dto;
 		}
+		public String getEmail() {
+			return email;
+		}
+		public String getLogin() {
+			return login;
+		}
+		public String getFirstName() {
+			return firstName;
+		}
+		public String getLastName() {
+			return lastName;
+		}
+		public String getUserKey() {
+			return userKey;
+		}
+		public Long getCreation() {
+			return creation;
+		}
+		public Boolean getIsFollowedByCurrentUser() {
+			return isFollowedByCurrentUser;
+		}
 	}
 	public static class UserSetDTO implements Serializable {
 		private static final long serialVersionUID = 1L;

@@ -1,10 +1,8 @@
 package com.twitterlite.controllers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
@@ -65,7 +63,7 @@ public class MessageController {
 			httpMethod = HttpMethod.POST
 	)
 	public MessageGetDTO postMessage(@Named("senderKey") String senderKeyStr,
-							  MessageSetDTO dto) throws BadRequestException {
+							  		MessageSetDTO dto) throws BadRequestException {
 		try {
 			String text = dto.getText();
 			if (text == null)
@@ -113,12 +111,28 @@ public class MessageController {
 		msgManager.get(keyStr).delete();
 	}
 	
+	public static class MessagesCollection {
+		public MessagesCollection(List<MessageGetDTO> list, String cursor) {
+			super();
+			this.list = list;
+			this.cursor = cursor;
+		}
+		public List<MessageGetDTO> list;
+		public String cursor;
+		public List<MessageGetDTO> getList() {
+			return list;
+		}
+		public String getCursor() {
+			return cursor;
+		}
+	}
+	
 	@ApiMethod(
 			name = "list",
 			path = "message",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getMessages(	@Nullable 
+	public MessagesCollection getMessages(	@Nullable 
 											@Named("cursor") String encodedCursor,
 											@Named("limit") Integer limit) {
 
@@ -129,11 +143,7 @@ public class MessageController {
 		for (Message msg : msgs.chunk)
 			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", msgs.getEncodedCursor());
-		
-		return map;
+		return new MessagesCollection(dtos, msgs.getEncodedCursor());
 	}
 	
 	@ApiMethod(
@@ -141,7 +151,7 @@ public class MessageController {
 			path = "message/user",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getUserMessages(	@Nullable 
+	public MessagesCollection getUserMessages(	@Nullable 
 												@Named("cursor") String encodedCursor,
 												@Named("limit") Integer limit,
 												@Named("userKey") String userKey) {
@@ -153,11 +163,7 @@ public class MessageController {
 		for (Message msg : msgs.chunk)
 			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", msgs.getEncodedCursor());
-		
-		return map;
+		return new MessagesCollection(dtos, msgs.getEncodedCursor());
 	}
 	
 	@ApiMethod(
@@ -165,7 +171,7 @@ public class MessageController {
 			path = "message/user/timeline",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getUserTimeline(	@Nullable 
+	public MessagesCollection getUserTimeline(	@Nullable 
 												@Named("cursor") String encodedCursor,
 												@Named("limit") Integer limit,
 												@Named("userKey") String userKey) {
@@ -177,10 +183,6 @@ public class MessageController {
 		for (Message msg : msgs.chunk)
 			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", msgs.getEncodedCursor());
-		
-		return map;
+		return new MessagesCollection(dtos, msgs.getEncodedCursor());
 	}
 }

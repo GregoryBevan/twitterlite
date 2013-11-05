@@ -15,6 +15,7 @@ import com.googlecode.objectify.annotation.Unindex;
 import com.twitterlite.models.LoadGroups.WithSender;
 import com.twitterlite.models.base.BaseModel;
 import com.twitterlite.models.user.User;
+import com.twitterlite.models.user.User.UserGetDTO;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -89,7 +90,7 @@ public class Message extends BaseModel {
 		private static final long serialVersionUID = 1L;
 		@CheckForNull public String text;
 		@CheckForNull public String messageKey;
-		@CheckForNull public String senderKey;
+		@CheckForNull public UserGetDTO sender;
 		@CheckForNull public Long creation;
 		
 		// Metadata
@@ -101,9 +102,24 @@ public class Message extends BaseModel {
 			MessageGetDTO dto = new MessageGetDTO();
 			dto.text = message.text;
 			dto.creation = message.creation;
-			dto.senderKey = message.sender.getKey().getString();
+			dto.sender = UserGetDTO.get(message.sender.get());
 			dto.messageKey = message.getKey().getString();
 			return dto;
+		}
+		public String getText() {
+			return text;
+		}
+		public String getMessageKey() {
+			return messageKey;
+		}
+		public UserGetDTO getSender() {
+			return sender;
+		}
+		public Long getCreation() {
+			return creation;
+		}
+		public Boolean getIsMessageFromCurrentUser() {
+			return isMessageFromCurrentUser;
 		}
 	}
 	public static class MessageSetDTO implements Serializable { 

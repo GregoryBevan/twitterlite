@@ -1,10 +1,8 @@
 package com.twitterlite.controllers;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -156,12 +154,28 @@ public class UserController {
 		}
 	}
 	
+	public static class UsersCollection {
+		public UsersCollection(List<UserGetDTO> list, String cursor) {
+			super();
+			this.list = list;
+			this.cursor = cursor;
+		}
+		public List<UserGetDTO> list;
+		public String cursor;
+		public List<UserGetDTO> getList() {
+			return list;
+		}
+		public String getCursor() {
+			return cursor;
+		}
+	}
+	
 	@ApiMethod(
 			name = "list",
 			path = "user",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getUsers(@Named("limit") Integer limit,
+	public UsersCollection getUsers(@Named("limit") Integer limit,
 										@Nullable @Named("cursor") String encodedCursor) {
 
 		if (limit < 0 || limit > 25)
@@ -171,11 +185,7 @@ public class UserController {
 		for (User user : users.chunk)
 			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
 		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", users.getEncodedCursor());
-		
-		return map;
+		return new UsersCollection(dtos, users.getEncodedCursor());
 	}
 	
 	@ApiMethod(
@@ -183,7 +193,7 @@ public class UserController {
 			path = "followers",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getUserFollowers(@Named("limit") Integer limit,
+	public UsersCollection getUserFollowers(@Named("limit") Integer limit,
 												@Named("userKey") String userKey,
 												@Nullable @Named("cursor") String encodedCursor) {
 		if (limit < 0 || limit > 25)
@@ -192,12 +202,8 @@ public class UserController {
 		List<UserGetDTO> dtos = new LinkedList<UserGetDTO>();
 		for (User user : users.chunk)
 			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
-		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", users.getEncodedCursor());
-		
-		return map;
+
+		return new UsersCollection(dtos, users.getEncodedCursor());
 	}
 	
 	@ApiMethod(
@@ -205,7 +211,7 @@ public class UserController {
 			path = "followed",
 			httpMethod = HttpMethod.GET
 		)
-	public Map<String, Object> getUserFollowed(@Named("limit") Integer limit,
+	public UsersCollection getUserFollowed(@Named("limit") Integer limit,
 												@Named("userKey") String userKey,
 												@Nullable @Named("cursor") String encodedCursor) {
 
@@ -217,10 +223,6 @@ public class UserController {
 			// for the moment leave it like this, however this should all have the metadata set to true
 			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
 		
-		Map<String, Object> map = new HashMap<>();
-		map.put("list", dtos);
-		map.put("cursor", users.getEncodedCursor());
-		
-		return map;
+		return new UsersCollection(dtos, users.getEncodedCursor());
 	}
 }

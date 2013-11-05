@@ -25,6 +25,7 @@ import com.googlecode.objectify.util.TranslatingQueryResultIterator;
 import com.twitterlite.managers.ListChunk;
 import com.twitterlite.managers.MessageManager;
 import com.twitterlite.managers.interceptors.TransactInterceptor.Transact;
+import com.twitterlite.models.LoadGroups.WithSender;
 import com.twitterlite.models.message.Message;
 import com.twitterlite.models.message.MessageReceiversIndex;
 import com.twitterlite.models.user.User;
@@ -60,7 +61,7 @@ public class MessageManagerImpl implements MessageManager {
 
 	@Override
 	public Boolean isMessageSender(Key<Message> msgKey, Key<User> senderKey) {
-		Message msg = ofy().load().type(Message.class).filter("id", msgKey.getId()).filter("sender", senderKey).first().now();
+		Message msg = ofy().load().group(WithSender.class).type(Message.class).filter("id", msgKey.getId()).filter("sender", senderKey).first().now();
 		if (msg != null)
 			return Boolean.TRUE;
 		else
@@ -119,7 +120,7 @@ public class MessageManagerImpl implements MessageManager {
 
 	@Override
 	public ManagedMessage get(Key<Message> key) throws NotFoundException {
-		Message msg= ofy().load().key(key).now();
+		Message msg= ofy().load().group(WithSender.class).key(key).now();
 		if (msg == null)
 			throw new NotFoundException("No such message: " + key.getString());
 		return msgFactory.create(msg);
@@ -128,7 +129,7 @@ public class MessageManagerImpl implements MessageManager {
 	@Override
 	public ListChunk<Message> getAllMessages(String cursorStr, int limit) {
 		Cursor cursor = CursorUtil.safeFromEncodedString(cursorStr);
-		Query<Message> query = ofy().load().type(Message.class).order("-creation").limit(limit);
+		Query<Message> query = ofy().load().group(WithSender.class).type(Message.class).order("-creation").limit(limit);
 		QueryResultIterable<Message> iterable = query.startAt(cursor).iterable();
 		return new ListChunk<>(iterable);
 	}
@@ -143,6 +144,7 @@ public class MessageManagerImpl implements MessageManager {
 	public ListChunk<Message> getUserMessages(String cursorStr, int limit, Key<User> userKey) {
 		Cursor cursor = CursorUtil.safeFromEncodedString(cursorStr);
 		Query<Message> query = ofy().load()
+									.group(WithSender.class)
 									.type(Message.class)
 									.filter("sender", userKey)
 									.order("-creation")
@@ -173,7 +175,7 @@ public class MessageManagerImpl implements MessageManager {
 				return from.getParent();
 			}
 		};
-		Iterable<Message> messages = ofy().load().keys(ListChunk.copyQueryResultIterator(it)).values();
+		Iterable<Message> messages = ofy().load().group(WithSender.class).keys(ListChunk.copyQueryResultIterator(it)).values();
 		return new ListChunk<>(messages, it.getCursor());
 	}
 
