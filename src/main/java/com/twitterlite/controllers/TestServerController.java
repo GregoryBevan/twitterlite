@@ -93,12 +93,11 @@ public class TestServerController {
 		}
 		
 		i = 0;
-		@SuppressWarnings("unchecked")
-		Key<User>[] keySet = users.toArray(new Key[usersNumber]);
+		User[] usersArray = users.toArray(new User[usersNumber]);
 		while (i < followersNumber) {
 			int u1 = (int)Math.floor(Math.random() * usersNumber);
 			int u2 = (int)Math.floor(Math.random() * usersNumber);
-			userManager.followUser(keySet[u1], keySet[u2]);
+			userManager.followUser(usersArray[u1].getKey(), usersArray[u2].getKey());
 			i = i + 2;
 		}
 	}
