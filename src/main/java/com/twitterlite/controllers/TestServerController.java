@@ -1,10 +1,7 @@
 package com.twitterlite.controllers;
 
-import static com.googlecode.objectify.ObjectifyService.ofy;
-
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Named;
 
@@ -22,7 +19,6 @@ import com.googlecode.objectify.Ref;
 import com.twitterlite.config.TwitterLiteManagerModule.CurrentUser;
 import com.twitterlite.managers.MessageManager;
 import com.twitterlite.managers.UserManager;
-import com.twitterlite.models.message.Message;
 import com.twitterlite.models.user.User;
 
 @Singleton
@@ -81,29 +77,24 @@ public class TestServerController {
 								) throws BadRequestException, NotFoundException {
 		
 		List<User> users = new LinkedList<>();
-		List<Message> msgs = new LinkedList<>();
 		
 		for (int i = 1; i < usersNumber + 1; i++)
-			users.add(new User( "login-" + i, "test@test-" + i +  ".com"));
-		
-		Map<Key<User>, User> usersMap = ofy().save().entities(users).now();
+			users.add(userManager.create("login-" + i, "test@test-" + i +  ".com").read());
 		
 		int i = 1;
-		for (Key<User> k : usersMap.keySet()) {
+		for (User u : users) {
 			int c = 10;
 			while (c > 0) {
 				--c;
-				msgs.add(new Message("login: " + usersMap.get(k).getLogin() +  " :: message number nº " + i++, Ref.create(k)));
+				msgManager.create("login: " + u.getLogin() +  " :: message number nº " + i++, Ref.create(u.getKey()));
 			}
-			ofy().save().entities(msgs);
-			msgs.clear();
 			if (i > msgsNumber)
 				break;
 		}
 		
 		i = 0;
 		@SuppressWarnings("unchecked")
-		Key<User>[] keySet = usersMap.keySet().toArray(new Key[usersNumber]);
+		Key<User>[] keySet = users.toArray(new Key[usersNumber]);
 		while (i < followersNumber) {
 			int u1 = (int)Math.floor(Math.random() * usersNumber);
 			int u2 = (int)Math.floor(Math.random() * usersNumber);
