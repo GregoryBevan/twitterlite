@@ -8,8 +8,6 @@ import javax.inject.Named;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
-import com.google.api.server.spi.response.BadRequestException;
-import com.google.api.server.spi.response.NotFoundException;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -73,8 +71,7 @@ public class TestServerController {
 	)
 	public void generateServer(	@Named("usersNumber") Integer usersNumber, 
 								@Named("msgsNumber") Integer msgsNumber,
-								@Named("followers") Integer followersNumber
-								) throws BadRequestException, NotFoundException {
+								@Named("followers") Integer followersNumber) {
 		
 		List<User> users = new LinkedList<>();
 		

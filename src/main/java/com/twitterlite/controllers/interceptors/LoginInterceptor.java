@@ -21,7 +21,9 @@ import com.twitterlite.models.user.User;
 @Singleton
 public class LoginInterceptor implements MethodInterceptor {
 
-	private Provider<Optional<Key<User>>> provider;
+	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+	
+	@CurrentUser private Provider<Optional<Key<User>>> provider;
 	
 	@Inject
 	public LoginInterceptor(@CurrentUser Provider<Optional<Key<User>>> provider) {
@@ -39,8 +41,9 @@ public class LoginInterceptor implements MethodInterceptor {
 			return invocation.proceed();
 
 		if (!provider.get().isPresent()) {
+			log.info("CURRENT USER IS NOT PRESENT");
 			String msg = "Call of a WS not logged in : " + invocation.getMethod() + " !";
-			Logger.getLogger(this.getClass().getName()).warning(msg);
+			log.warning(msg);
 			throw new RuntimeException(msg);
 		}
 		return invocation.proceed();

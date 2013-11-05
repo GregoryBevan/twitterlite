@@ -106,6 +106,10 @@ public class User extends BaseModel {
 		@CheckForNull public String lastName;
 		@CheckForNull public String userKey;
 		@CheckForNull public Long creation;
+		
+		// Metadata
+		@CheckForNull public Boolean isFollowedByCurrentUser = Boolean.FALSE;
+		
 		public UserGetDTO(){}
 		public static UserGetDTO get(User user) {
 			UserGetDTO dto = new UserGetDTO();

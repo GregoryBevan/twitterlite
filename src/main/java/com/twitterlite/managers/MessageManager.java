@@ -19,6 +19,9 @@ public interface MessageManager {
 	public ManagedMessage get(String keyStr) throws NotFoundException;
 	public ManagedMessage get(Key<Message> key) throws NotFoundException;
 	
+	public Boolean isMessageSender(Key<Message> msgKey, Key<User> senderKey);
+	public Boolean isMessageSender(String msgKeyStr, String senderKeyStr);
+	
 	/*
 	 * Get all the messages in the datastore
 	 */

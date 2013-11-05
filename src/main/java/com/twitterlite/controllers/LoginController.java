@@ -1,14 +1,18 @@
 package com.twitterlite.controllers;
 
+import java.util.logging.Logger;
+
 import javax.annotation.CheckForNull;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -28,9 +32,9 @@ import static com.google.common.base.Preconditions.*;
 public class LoginController {
 
 	UserManager userManager;
-	Provider<Optional<Key<User>>> currentUserProvider;
+	@CurrentUser Provider<Optional<Key<User>>> currentUserProvider;
 	
-//	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
+	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 	
 	// TODO: log everywhere
 	
@@ -43,6 +47,12 @@ public class LoginController {
 	public static class LoginDTO {
 		public @CheckForNull String login;
 		public @CheckForNull String email;
+		public void setLogin(String login) {
+			this.login = login;
+		}
+		public void setEmail(String email) {
+			this.email = email;
+		}
 	}
 	
 	@ApiMethod(
@@ -56,7 +66,11 @@ public class LoginController {
 			checkNotNull(dto.login);
 			checkNotNull(dto.email);
 			currentUserKey = userManager.get(dto.login, dto.email).read().getKey();
-			req.getSession().setAttribute(CONSTANTS.SESSION.CURRENT_USER_KEY, currentUserKey.getString());
+			
+			MemcacheService mem = MemcacheServiceFactory.getMemcacheService();
+			mem.put(CONSTANTS.MEMCACHE.CURRENT_USER_KEY + req.getRemoteAddr(), currentUserKey.getString(), Expiration.byDeltaSeconds(CONSTANTS.MEMCACHE.SESSION_EXPIRATION_SEC));
+			log.info("USER LOGGED IN : " + dto.login + " : email : " + dto.email);
+			log.info("SESSION ID : " + req.getRemoteAddr());
 		} catch (IllegalArgumentException | NullPointerException e) {
 			throw new BadRequestException(e);
 		}
@@ -69,11 +83,8 @@ public class LoginController {
 	)
 	public void logout(HttpServletRequest req) throws BadRequestException {
 		if (currentUserProvider.get().isPresent()) {
-			HttpSession session = req.getSession(false);
-			if (session != null) {
-				session.removeAttribute(CONSTANTS.SESSION.CURRENT_USER_KEY);
-				session.invalidate();
-			}
+			MemcacheService mem = MemcacheServiceFactory.getMemcacheService();
+			mem.delete(CONSTANTS.MEMCACHE.CURRENT_USER_KEY + req.getRemoteAddr());
 		}
 		else 
 			throw new BadRequestException("You must be logged in to logout.");

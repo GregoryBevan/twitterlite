@@ -14,8 +14,12 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.googlecode.objectify.Key;
+import com.twitterlite.config.TwitterLiteManagerModule.CurrentUser;
 import com.twitterlite.controllers.interceptors.InterceptWith;
 import com.twitterlite.controllers.interceptors.LoginInterceptor;
 import com.twitterlite.managers.ListChunk;
@@ -24,6 +28,7 @@ import com.twitterlite.managers.MessageManager.ManagedMessage;
 import com.twitterlite.models.message.Message;
 import com.twitterlite.models.message.Message.MessageGetDTO;
 import com.twitterlite.models.message.Message.MessageSetDTO;
+import com.twitterlite.models.user.User;
 import com.twitterlite.util.BeanExtraUtils;
 
 @Singleton
@@ -34,14 +39,24 @@ import com.twitterlite.util.BeanExtraUtils;
 public class MessageController {
 	
 	private MessageManager msgManager;
-	
+	@CurrentUser private Provider<Optional<Key<User>>> currentUserProvider;
 //	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 	
 	// TODO: log everywhere
 	
 	@Inject
-	public MessageController(MessageManager msgManager) {
+	public MessageController(	@CurrentUser	
+								Provider<Optional<Key<User>>> currentUserProvider,
+								MessageManager msgManager) {
 		this.msgManager = msgManager;
+		this.currentUserProvider = currentUserProvider;
+	}
+	
+	public MessageGetDTO updateMessageDTOMetadata(MessageGetDTO dto) {
+		Key<User> currentUserKey = currentUserProvider.get().orNull();
+		if (currentUserKey != null && dto.messageKey != null)  
+			dto.isMessageFromCurrentUser = msgManager.isMessageSender(dto.messageKey, currentUserKey.getString());
+		return dto;
 	}
 	
 	@ApiMethod(
@@ -63,20 +78,20 @@ public class MessageController {
 	
 	@ApiMethod(
 			name = "read",
-			path = "message/{key}",
+			path = "message/{msgKey}",
 			httpMethod = HttpMethod.GET
 		)
-	public MessageGetDTO getMessage(@Named("key") String keyStr) throws NotFoundException {
-		return MessageGetDTO.get(msgManager.get(keyStr).read());
+	public MessageGetDTO getMessage(@Named("msgKey") String keyStr) throws NotFoundException {
+		return updateMessageDTOMetadata(MessageGetDTO.get(msgManager.get(keyStr).read()));
 	}
 	
 	@ApiMethod(
 			name = "patch", // had to call it patch to overwrite the method user.patch created by the system
 							// which yields a 404 when called
-			path = "message/{key}",
+			path = "message/{msgKey}",
 			httpMethod = HttpMethod.PUT
 		)
-	public void updateMessage(@Named("key") String keyStr, MessageSetDTO dto) throws NotFoundException, BadRequestException {
+	public void updateMessage(@Named("msgKey") String keyStr, MessageSetDTO dto) throws NotFoundException, BadRequestException {
 		ManagedMessage mngMsg = msgManager.get(keyStr);
 		try {
 			String text = dto.getText();
@@ -91,10 +106,10 @@ public class MessageController {
 	
 	@ApiMethod(
 			name = "delete",
-			path = "message/{key}",
+			path = "message/{msgKey}",
 			httpMethod = HttpMethod.DELETE
 		)
-	public void deleteMessage(@Named("key") String keyStr) throws NotFoundException {
+	public void deleteMessage(@Named("msgKey") String keyStr) throws NotFoundException {
 		msgManager.get(keyStr).delete();
 	}
 	
@@ -112,7 +127,7 @@ public class MessageController {
 		ListChunk<Message> msgs = msgManager.getAllMessages(encodedCursor, limit.intValue());
 		List<MessageGetDTO> dtos = new LinkedList<MessageGetDTO>();
 		for (Message msg : msgs.chunk)
-			dtos.add(MessageGetDTO.get(msg));
+			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
@@ -136,7 +151,7 @@ public class MessageController {
 		ListChunk<Message> msgs = msgManager.getUserMessages(encodedCursor, limit.intValue(), userKey);
 		List<MessageGetDTO> dtos = new LinkedList<MessageGetDTO>();
 		for (Message msg : msgs.chunk)
-			dtos.add(MessageGetDTO.get(msg));
+			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
@@ -160,7 +175,7 @@ public class MessageController {
 		ListChunk<Message> msgs = msgManager.getUserTimeLine(encodedCursor, limit.intValue(), userKey);
 		List<MessageGetDTO> dtos = new LinkedList<MessageGetDTO>();
 		for (Message msg : msgs.chunk)
-			dtos.add(MessageGetDTO.get(msg));
+			dtos.add(updateMessageDTOMetadata(MessageGetDTO.get(msg)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);

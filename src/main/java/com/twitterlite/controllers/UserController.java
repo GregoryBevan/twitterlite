@@ -15,8 +15,12 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.googlecode.objectify.Key;
+import com.twitterlite.config.TwitterLiteManagerModule.CurrentUser;
 import com.twitterlite.controllers.interceptors.InterceptWith;
 import com.twitterlite.controllers.interceptors.LoginInterceptor;
 import com.twitterlite.controllers.interceptors.LoginInterceptor.LoginNotNeeded;
@@ -38,19 +42,36 @@ import static com.google.common.base.Preconditions.*;
 public class UserController {
 	
 	private UserManager userManager;
+	@CurrentUser private Provider<Optional<Key<User>>> currentUserProvider;
 	
 //	private final Logger log = Logger.getLogger(this.getClass().getSimpleName());
 	
 	// TODO: log everywhere
 	
 	@Inject
-	public UserController(UserManager usrManager) {
+	public UserController(	@CurrentUser 
+							Provider<Optional<Key<User>>> currentUserProvider,
+							UserManager usrManager) {
 		this.userManager = usrManager;
+		this.currentUserProvider = currentUserProvider;
 	}
 	
 	public static class CreateUserdDTO {
 		@CheckForNull public String email;
 		@CheckForNull public String login;
+		public void setEmail(String email) {
+			this.email = email;
+		}
+		public void setLogin(String login) {
+			this.login = login;
+		}
+	}
+	
+	public UserGetDTO updateUserDTOMetadata(UserGetDTO dto) {
+		Key<User> currentUserKey = currentUserProvider.get().orNull();
+		if (currentUserKey != null && dto.userKey != null)  
+			dto.isFollowedByCurrentUser = userManager.isUserFollowing(dto.userKey, currentUserKey.getString());
+		return dto;
 	}
 	
 	@ApiMethod(
@@ -73,20 +94,21 @@ public class UserController {
 	
 	@ApiMethod(
 			name = "read",
-			path = "user/{key}",
+			path = "user/{userKey}",
 			httpMethod = HttpMethod.GET
 		)
-	public UserGetDTO getUser(@Named("key") String keyStr) throws NotFoundException {
-		return UserGetDTO.get(userManager.get(keyStr).read());
+	public UserGetDTO getUser(@Named("userKey") String keyStr) throws NotFoundException {
+		UserGetDTO dto = UserGetDTO.get(userManager.get(keyStr).read());
+		return updateUserDTOMetadata(dto); 
 	}
 	
 	@ApiMethod(
 			name = "patch", // had to call it patch to overwrite the method user.patch created by the system
 							// which yields a 404 when called
-			path = "user/{key}",
+			path = "user/{userKey}",
 			httpMethod = HttpMethod.PUT
 		)
-	public void updateUser(@Named("key") String keyStr, UserSetDTO dto) throws NotFoundException, BadRequestException {
+	public void updateUser(@Named("userKey") String keyStr, UserSetDTO dto) throws NotFoundException, BadRequestException {
 		ManagedUser mUser = userManager.get(keyStr);
 		try {
 			// TODO: here we should check that we can't set a new login or email that already exists in the db
@@ -99,10 +121,10 @@ public class UserController {
 	
 	@ApiMethod(
 			name = "delete",
-			path = "user/{key}",
+			path = "user/{userKey}",
 			httpMethod = HttpMethod.DELETE
 		)
-	public void deleteUser(@Named("key") String keyStr) throws NotFoundException {
+	public void deleteUser(@Named("userKey") String keyStr) throws NotFoundException {
 		userManager.get(keyStr).delete();
 	}
 	
@@ -147,7 +169,7 @@ public class UserController {
 		ListChunk<User> users = userManager.getAllUsers(encodedCursor, limit.intValue());
 		List<UserGetDTO> dtos = new LinkedList<UserGetDTO>();
 		for (User user : users.chunk)
-			dtos.add(UserGetDTO.get(user));
+			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
@@ -162,14 +184,14 @@ public class UserController {
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserFollowers(@Named("limit") Integer limit,
-												@Named("key") String userKey,
+												@Named("userKey") String userKey,
 												@Nullable @Named("cursor") String encodedCursor) {
 		if (limit < 0 || limit > 25)
 			limit = 25;
 		ListChunk<User> users = userManager.getUserFollowers(encodedCursor, limit.intValue(), userKey);
 		List<UserGetDTO> dtos = new LinkedList<UserGetDTO>();
 		for (User user : users.chunk)
-			dtos.add(UserGetDTO.get(user));
+			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);
@@ -184,7 +206,7 @@ public class UserController {
 			httpMethod = HttpMethod.GET
 		)
 	public Map<String, Object> getUserFollowed(@Named("limit") Integer limit,
-												@Named("key") String userKey,
+												@Named("userKey") String userKey,
 												@Nullable @Named("cursor") String encodedCursor) {
 
 		if (limit < 0 || limit > 25)
@@ -192,7 +214,8 @@ public class UserController {
 		ListChunk<User> users = userManager.getUserFollowed(encodedCursor, limit.intValue(), userKey);
 		List<UserGetDTO> dtos = new LinkedList<UserGetDTO>();
 		for (User user : users.chunk)
-			dtos.add(UserGetDTO.get(user));
+			// for the moment leave it like this, however this should all have the metadata set to true
+			dtos.add(updateUserDTOMetadata(UserGetDTO.get(user)));
 		
 		Map<String, Object> map = new HashMap<>();
 		map.put("list", dtos);

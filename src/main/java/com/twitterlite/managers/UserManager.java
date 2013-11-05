@@ -17,6 +17,9 @@ public interface UserManager {
 	public ManagedUser get(String keyStr) throws NotFoundException;
 	public ManagedUser get(Key<User> key) throws NotFoundException;
 	
+	public Boolean isUserFollowing(Key<User> followedKey, Key<User> followerKey);
+	public Boolean isUserFollowing(String followedKeyStr, String followerKeyStr);
+	
 	/*
 	 * follow user management
 	 */

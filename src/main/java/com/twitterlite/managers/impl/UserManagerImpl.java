@@ -44,6 +44,22 @@ public class UserManagerImpl implements UserManager {
 	}
 
 	@Override
+	public Boolean isUserFollowing(Key<User> followedKey, Key<User> followerKey) {
+		UserFollowedIndex index = ofy().load().type(UserFollowedIndex.class).ancestor(followerKey).filter("followed", followedKey).first().now();
+		if (index != null)
+			return Boolean.TRUE;
+		else
+			return Boolean.FALSE;
+	}
+	
+	@Override
+	public Boolean isUserFollowing(String followedKeyStr, String followerKeyStr) {
+		Key<User> followerKey = Key.create(followerKeyStr);
+		Key<User> followedKey = Key.create(followedKeyStr);
+		return isUserFollowing(followedKey, followerKey);
+	}
+
+	@Override
 	@Transact(TxnType.REQUIRED)
 	public ManagedUser create(final String login, final String email) throws IllegalArgumentException {
 

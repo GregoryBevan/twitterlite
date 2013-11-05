@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datastore-indexes autoGenerate="true">
+
+    <datastore-index kind="M" ancestor="false" source="auto">
+        <property name="sender" direction="asc"/>
+        <property name="creation" direction="desc"/>
+    </datastore-index>
+
+</datastore-indexes>

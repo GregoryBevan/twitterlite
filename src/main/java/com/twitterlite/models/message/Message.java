@@ -92,6 +92,9 @@ public class Message extends BaseModel {
 		@CheckForNull public String senderKey;
 		@CheckForNull public Long creation;
 		
+		// Metadata
+		@CheckForNull public Boolean isMessageFromCurrentUser = Boolean.FALSE;
+		
 		public MessageGetDTO(){}
 		
 		public static MessageGetDTO get(Message message) {

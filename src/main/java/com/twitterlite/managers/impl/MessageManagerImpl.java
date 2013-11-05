@@ -49,6 +49,24 @@ public class MessageManagerImpl implements MessageManager {
 		public abstract ManagedMessageImpl create(Message msg);
 	}
 
+	
+	
+	@Override
+	public Boolean isMessageSender(String msgKeyStr, String senderKeyStr) {
+		Key<Message> msgKey = Key.create(msgKeyStr);
+		Key<User> senderKey = Key.create(senderKeyStr);
+		return isMessageSender(msgKey, senderKey);
+	}
+
+	@Override
+	public Boolean isMessageSender(Key<Message> msgKey, Key<User> senderKey) {
+		Message msg = ofy().load().type(Message.class).filter("id", msgKey.getId()).filter("sender", senderKey).first().now();
+		if (msg != null)
+			return Boolean.TRUE;
+		else
+			return Boolean.FALSE;
+	}
+
 	@Override
 	public ManagedMessage create(String text, String senderKeyStr) throws IllegalArgumentException {
 		Key<User> senderKey = Key.create(senderKeyStr);
