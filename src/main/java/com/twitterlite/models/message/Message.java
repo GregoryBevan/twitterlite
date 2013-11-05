@@ -98,6 +98,7 @@ public class Message extends BaseModel {
 		
 		public MessageGetDTO(){}
 		
+		
 		public static MessageGetDTO get(Message message) {
 			MessageGetDTO dto = new MessageGetDTO();
 			dto.text = message.text;

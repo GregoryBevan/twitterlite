@@ -22,7 +22,8 @@ import com.twitterlite.models.user.User;
 @Singleton
 @Api(
 	name = "test",
-	version = "v1")
+	version = "v1"
+)
 public class TestServerController {
 
 	UserManager userManager;
