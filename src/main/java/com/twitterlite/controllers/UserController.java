@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 
 import com.google.api.server.spi.config.Api;
+import com.google.api.server.spi.config.ApiAuth;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;

@@ -22,6 +22,7 @@ import com.twitterlite.config.CONSTANTS;
 import com.twitterlite.config.TwitterLiteManagerModule.CurrentUser;
 import com.twitterlite.managers.UserManager;
 import com.twitterlite.models.user.User;
+import com.twitterlite.models.user.User.UserGetDTO;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -60,17 +61,19 @@ public class LoginController {
 			path = "",
 			httpMethod = HttpMethod.POST
 	)
-	public void login(LoginDTO dto, HttpServletRequest req) throws BadRequestException, NotFoundException {
+	public UserGetDTO login(LoginDTO dto, HttpServletRequest req) throws BadRequestException, NotFoundException {
 		Key<User> currentUserKey;
 		try {
 			checkNotNull(dto.login);
 			checkNotNull(dto.email);
-			currentUserKey = userManager.get(dto.login, dto.email).read().getKey();
+			User usr = userManager.get(dto.login, dto.email).read();
+			currentUserKey = usr.getKey();
 			
 			MemcacheService mem = MemcacheServiceFactory.getMemcacheService();
 			mem.put(CONSTANTS.MEMCACHE.CURRENT_USER_KEY + req.getRemoteAddr(), currentUserKey.getString(), Expiration.byDeltaSeconds(CONSTANTS.MEMCACHE.SESSION_EXPIRATION_SEC));
 			log.info("USER LOGGED IN : " + dto.login + " : email : " + dto.email);
 			log.info("SESSION ID : " + req.getRemoteAddr());
+			return UserGetDTO.get(usr);
 		} catch (IllegalArgumentException | NullPointerException e) {
 			throw new BadRequestException(e);
 		}

@@ -108,6 +108,7 @@ public class MessageController {
 			httpMethod = HttpMethod.DELETE
 		)
 	public void deleteMessage(@Named("msgKey") String keyStr) throws NotFoundException {
+		// only the sender or an admin should be able to delete a message
 		msgManager.get(keyStr).delete();
 	}
 	
