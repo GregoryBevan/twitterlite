@@ -50,7 +50,7 @@ public class MessageController {
 		this.currentUserProvider = currentUserProvider;
 	}
 	
-	public MessageGetDTO updateMessageDTOMetadata(MessageGetDTO dto) {
+	private MessageGetDTO updateMessageDTOMetadata(MessageGetDTO dto) {
 		Key<User> currentUserKey = currentUserProvider.get().orNull();
 		if (currentUserKey != null && dto.messageKey != null)  
 			dto.isMessageFromCurrentUser = msgManager.isMessageSender(dto.messageKey, currentUserKey.getString());
@@ -112,7 +112,7 @@ public class MessageController {
 		msgManager.get(keyStr).delete();
 	}
 	
-	public static class MessagesCollection {
+	private static class MessagesCollection {
 		public MessagesCollection(List<MessageGetDTO> list, String cursor) {
 			super();
 			this.list = list;

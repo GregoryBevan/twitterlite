@@ -1,5 +1,7 @@
 package com.twitterlite.controllers;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +11,6 @@ import javax.annotation.Nullable;
 import javax.inject.Named;
 
 import com.google.api.server.spi.config.Api;
-import com.google.api.server.spi.config.ApiAuth;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;
@@ -30,8 +31,6 @@ import com.twitterlite.models.user.User;
 import com.twitterlite.models.user.User.UserGetDTO;
 import com.twitterlite.models.user.User.UserSetDTO;
 import com.twitterlite.util.BeanExtraUtils;
-
-import static com.google.common.base.Preconditions.*;
 
 @Singleton
 @InterceptWith(LoginInterceptor.class)
@@ -55,7 +54,8 @@ public class UserController {
 		this.currentUserProvider = currentUserProvider;
 	}
 	
-	public static class CreateUserdDTO {
+	@SuppressWarnings("unused")
+	private static class CreateUserdDTO {
 		@CheckForNull public String email;
 		@CheckForNull public String login;
 		public void setEmail(String email) {
@@ -66,7 +66,7 @@ public class UserController {
 		}
 	}
 	
-	public UserGetDTO updateUserDTOMetadata(UserGetDTO dto) {
+	private UserGetDTO updateUserDTOMetadata(UserGetDTO dto) {
 		Key<User> currentUserKey = currentUserProvider.get().orNull();
 		if (currentUserKey != null && dto.userKey != null)  
 			dto.isFollowedByCurrentUser = userManager.isUserFollowing(dto.userKey, currentUserKey.getString());
