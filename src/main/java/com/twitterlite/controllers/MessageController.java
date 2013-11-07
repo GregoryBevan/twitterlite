@@ -68,7 +68,9 @@ public class MessageController {
 			String text = dto.getText();
 			if (text == null)
 				throw new BadRequestException("Message text must be at least one character and less than 140 characters");
-			return MessageGetDTO.get(msgManager.create(text, senderKeyStr).read());
+			MessageGetDTO getDto = MessageGetDTO.get(msgManager.create(text, senderKeyStr).read());
+			getDto.isMessageFromCurrentUser = true;
+			return getDto;
 		} catch (IllegalArgumentException e) {
 			throw new BadRequestException(e.getMessage());
 		}
