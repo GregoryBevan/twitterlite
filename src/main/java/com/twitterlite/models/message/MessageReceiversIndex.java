@@ -19,7 +19,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static com.google.common.base.Preconditions.*;
 
-@Entity
+@Entity(name = "M_index")
 @Cache
 @Unindex
 public class MessageReceiversIndex extends BaseModel {

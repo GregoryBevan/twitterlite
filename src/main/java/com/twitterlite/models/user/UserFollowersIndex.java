@@ -18,7 +18,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import static com.google.common.base.Preconditions.*;
 
-@Entity
+@Entity(name = "U_Followers")
 @Cache
 @Unindex
 public class UserFollowersIndex extends BaseModel{

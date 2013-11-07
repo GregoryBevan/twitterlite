@@ -8,6 +8,10 @@ import javax.inject.Named;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
+import com.google.appengine.api.backends.BackendServiceFactory;
+import com.google.appengine.api.taskqueue.DeferredTask;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,7 +21,13 @@ import com.googlecode.objectify.Ref;
 import com.twitterlite.config.TwitterLiteManagerModule.CurrentUser;
 import com.twitterlite.managers.MessageManager;
 import com.twitterlite.managers.UserManager;
+import com.twitterlite.models.message.Message;
+import com.twitterlite.models.message.MessageReceiversIndex;
 import com.twitterlite.models.user.User;
+import com.twitterlite.models.user.UserFollowedIndex;
+import com.twitterlite.models.user.UserFollowersIndex;
+
+import static com.googlecode.objectify.ObjectifyService.*;
 
 @Singleton
 @Api(
@@ -43,27 +53,28 @@ public class TestServerController {
 		this.currentUserProvider = currentUserProvider;
 	}
 	
-//	public static class GenerateEntityTask<T> implements DeferredTask {
-//		
-//		private List<T> entities;
-//		private Integer count;
-//		
-//		public static interface EntityGenerator<T> {
-//			List<T>entities(Integer count);
-//		}
-//		
-//		public GenerateEntityTask(List<T> entities, Integer count) {
-//			this.entities = entities;
-//			this.count = count;
-//			
-//		}
-//		
-//		@Override
-//		public void run() {
-//			
-//			
-//		}
-//	}
+	public static class DeleteTestServerTask implements DeferredTask {
+		
+		@Override
+		public void run() {
+			
+			// this will certainly throw a DataStore TimeOut Exception if there are too many user entities
+			Iterable<Key<User>> it = ofy().load().type(User.class).keys().iterable();
+			for (Key<User> key : it) {
+				Iterable<Key<UserFollowedIndex>> it2 = ofy().load().type(UserFollowedIndex.class).ancestor(key).keys().iterable();
+				Iterable<Key<UserFollowersIndex>> it3 = ofy().load().type(UserFollowersIndex.class).ancestor(key).keys().iterable();
+				ofy().delete().entities(it2);
+				ofy().delete().entities(it3);
+			}
+			ofy().delete().entities(it);
+			Iterable<Key<Message>> it4 = ofy().load().type(Message.class).keys().iterable();
+			for (Key<Message> key : it4) {
+				Iterable<Key<MessageReceiversIndex>> it5 = ofy().load().type(MessageReceiversIndex.class).ancestor(key).keys().iterable();
+				ofy().delete().entities(it5);
+			}
+			ofy().delete().entities(it4);
+		}
+	}
 	
 	@ApiMethod(
 			name = "generate.server",
@@ -98,5 +109,17 @@ public class TestServerController {
 			userManager.followUser(usersArray[u1].getKey(), usersArray[u2].getKey());
 			i = i + 2;
 		}
+	}
+	
+	@ApiMethod(
+			name = "clear.server",
+			path = "clear/server",
+			httpMethod = HttpMethod.POST
+	)
+	public void clearServer() {
+		QueueFactory.getDefaultQueue().add(TaskOptions
+				.Builder
+				.withPayload(new DeleteTestServerTask())
+				.header("Host", BackendServiceFactory.getBackendService().getBackendAddress("message-backend")));
 	}
 }

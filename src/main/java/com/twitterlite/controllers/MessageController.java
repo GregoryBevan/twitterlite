@@ -112,6 +112,7 @@ public class MessageController {
 		msgManager.get(keyStr).delete();
 	}
 	
+	@SuppressWarnings("unused")
 	private static class MessagesCollection {
 		public MessagesCollection(List<MessageGetDTO> list, String cursor) {
 			super();
