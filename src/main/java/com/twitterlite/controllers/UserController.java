@@ -111,7 +111,7 @@ public class UserController {
 	public void updateUser(@Named("userKey") String keyStr, UserSetDTO dto) throws NotFoundException, BadRequestException {
 		ManagedUser mUser = userManager.get(keyStr);
 		try {
-			UserManagerImpl.checkThatLoginAndEmailNotUsed(dto.getLogin(), dto.getEmail());
+			UserManagerImpl.checkThatLoginAndEmailNotUsed(dto.getLogin(), dto.getEmail(), keyStr);
 			BeanExtraUtils.copyOnlyNonNullProperties(mUser.read(), dto);
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new BadRequestException(e.getMessage());

@@ -1,5 +1,7 @@
 package com.twitterlite.managers.impl;
 
+import javax.annotation.CheckForNull;
+
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterable;
@@ -43,16 +45,24 @@ public class UserManagerImpl implements UserManager {
 		public abstract ManagedUserImpl create(User user);
 	}
 	
-	public static void checkThatLoginAndEmailNotUsed(String login, String email) {
+	public static void checkThatLoginAndEmailNotUsed(String login, String email, @CheckForNull String userKey) {
 		// check that login, or email already used in DB
 		// Only Ancestor queries are allowed inside transactions
-		boolean loginUsed = ofy().transactionless().load().type(User.class).filter("login", login).limit(1).count() == 1;
-		boolean emailUsed = ofy().transactionless().load().type(User.class).filter("email", email).limit(1).count() == 1;
 		
-		if (loginUsed)
-			throw new IllegalArgumentException("login already exists in the database");
-		if (emailUsed)
-			throw new IllegalArgumentException("email already exists in the database");
+		Key<User> foundLoginKey = ofy().transactionless().load().type(User.class).filter("login", login).keys().first().now();
+		Key<User> foundEmailKey = ofy().transactionless().load().type(User.class).filter("email", email).keys().first().now();
+
+		if (userKey != null) {
+			if (!foundLoginKey.equals(userKey))
+				throw new IllegalArgumentException("login already exists in the database");
+			if (!foundEmailKey.equals(userKey))
+				throw new IllegalArgumentException("email already exists in the database");
+		} else {
+			if (foundLoginKey != null)
+				throw new IllegalArgumentException("login already exists in the database");
+			if (foundEmailKey != null)
+				throw new IllegalArgumentException("email already exists in the database");
+		}
 	}
 
 	@Override
@@ -75,7 +85,7 @@ public class UserManagerImpl implements UserManager {
 	@Transact(TxnType.REQUIRED)
 	public ManagedUser create(final String login, final String email) throws IllegalArgumentException {
 
-		checkThatLoginAndEmailNotUsed(login, email);
+		checkThatLoginAndEmailNotUsed(login, email, null);
 
 		User user = new User(login, email);
 		Key<User> usrKey = ofy().save().entity(user).now();
