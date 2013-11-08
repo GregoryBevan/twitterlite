@@ -1,7 +1,5 @@
 package com.twitterlite.controllers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,10 +25,13 @@ import com.twitterlite.controllers.interceptors.LoginInterceptor.LoginNotNeeded;
 import com.twitterlite.managers.ListChunk;
 import com.twitterlite.managers.UserManager;
 import com.twitterlite.managers.UserManager.ManagedUser;
+import com.twitterlite.managers.impl.UserManagerImpl;
 import com.twitterlite.models.user.User;
 import com.twitterlite.models.user.User.UserGetDTO;
 import com.twitterlite.models.user.User.UserSetDTO;
 import com.twitterlite.util.BeanExtraUtils;
+
+import static com.google.common.base.Preconditions.*;
 
 @Singleton
 @InterceptWith(LoginInterceptor.class)
@@ -110,7 +111,7 @@ public class UserController {
 	public void updateUser(@Named("userKey") String keyStr, UserSetDTO dto) throws NotFoundException, BadRequestException {
 		ManagedUser mUser = userManager.get(keyStr);
 		try {
-			// TODO: here we should check that we can't set a new login or email that already exists in the db
+			UserManagerImpl.checkThatLoginAndEmailNotUsed(dto.getLogin(), dto.getEmail());
 			BeanExtraUtils.copyOnlyNonNullProperties(mUser.read(), dto);
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new BadRequestException(e.getMessage());

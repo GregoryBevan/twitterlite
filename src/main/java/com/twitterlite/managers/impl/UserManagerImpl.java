@@ -42,6 +42,18 @@ public class UserManagerImpl implements UserManager {
 	public static interface ManagedUserFactory {
 		public abstract ManagedUserImpl create(User user);
 	}
+	
+	public static void checkThatLoginAndEmailNotUsed(String login, String email) {
+		// check that login, or email already used in DB
+		// Only Ancestor queries are allowed inside transactions
+		boolean loginUsed = ofy().transactionless().load().type(User.class).filter("login", login).limit(1).count() == 1;
+		boolean emailUsed = ofy().transactionless().load().type(User.class).filter("email", email).limit(1).count() == 1;
+		
+		if (loginUsed)
+			throw new IllegalArgumentException("login already exists in the database");
+		if (emailUsed)
+			throw new IllegalArgumentException("email already exists in the database");
+	}
 
 	@Override
 	public Boolean isUserFollowing(Key<User> followedKey, Key<User> followerKey) {
@@ -63,14 +75,7 @@ public class UserManagerImpl implements UserManager {
 	@Transact(TxnType.REQUIRED)
 	public ManagedUser create(final String login, final String email) throws IllegalArgumentException {
 
-		// check that login, or email are not already used in DB
-		boolean loginUsed = ofy().transactionless().load().type(User.class).filter("login", login).limit(1).count() == 1;
-		boolean emailUsed = ofy().transactionless().load().type(User.class).filter("email", email).limit(1).count() == 1;
-
-		if (loginUsed)
-			throw new IllegalArgumentException("login already exists in the database");
-		if (emailUsed)
-			throw new IllegalArgumentException("email already exists in the database");
+		checkThatLoginAndEmailNotUsed(login, email);
 
 		User user = new User(login, email);
 		Key<User> usrKey = ofy().save().entity(user).now();

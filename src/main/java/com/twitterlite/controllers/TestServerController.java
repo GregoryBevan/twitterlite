@@ -54,7 +54,8 @@ public class TestServerController {
 	}
 	
 	public static class DeleteTestServerTask implements DeferredTask {
-		
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public void run() {
 			

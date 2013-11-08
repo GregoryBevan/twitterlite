@@ -70,21 +70,6 @@ public class Message extends BaseModel {
 	 * Unfortunately we use Objectify's Key<T> and Ref<T> types extensively in our models
 	 * for referencing other entities. We could just stores keys as strings in the entities
 	 * but we would loose some very convenient Objectify's features (ex: loadgroups)
-	 * 
-	 * Here we use a no-arguments constructor and 
-	 * public properties so that Endpoints which uses
-	 * jackson and bean utils can create this bean even from an incomplete
-	 * json representation of this object. Ex: {firstName:"toto"}.
-	 * Any property missing from the json will just be null.
-	 * 
-	 * This is very convenient for updating the model however
-	 * it is important to acknowledge that we need the getters for the dto properties 
-	 * in order to copy the properties between beans.
-	 * 
-	 * Notice how the userKey getter is missing 
-	 * because the User Bean does not have a key property but must overwrite 
-	 * the abstract method getKey from the BaseModel.
-	 * 
 	 */
 	public static class MessageGetDTO implements Serializable { 
 		private static final long serialVersionUID = 1L;
@@ -123,6 +108,19 @@ public class Message extends BaseModel {
 			return isMessageFromCurrentUser;
 		}
 	}
+	
+	/* 
+	 * Here we use a no-arguments constructor and 
+	 * public properties so that Endpoints which uses
+	 * jackson and bean utils can create this bean even from an incomplete
+	 * json representation of this object. Ex: {firstName:"toto"}.
+	 * Any property missing from the json will just be null.
+	 * 
+	 * This is very convenient for updating the model however
+	 * it is important to acknowledge that we need the getters for the dto properties 
+	 * in order to copy the properties between beans.
+	 * 
+	 */
 	public static class MessageSetDTO implements Serializable { 
 		private static final long serialVersionUID = 1L;
 		@CheckForNull private String text;
